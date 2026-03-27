@@ -1,0 +1,119 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cctype>
+
+using namespace std;
+
+vector<string> unidades = {"", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"};
+vector<string> dezenas = {"", "", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"};
+vector<string> especiais = {"dez", "onze", "doze", "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove"};
+vector<string> centenas = {"", "cento", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos", "oitocentos", "novecentos"};
+
+bool validarEntrada(string num) {
+    for (char c : num) {
+        if (!isdigit(c) && c != '.' && c != ',') return false;
+    }
+    return true;
+}
+
+string converteGrupo(int n) {
+    string resultado = "";
+
+    int c = n / 100;
+    int d = (n % 100) / 10;
+    int u = n % 10;
+
+    if (n == 100) return "cem";
+
+    if (c > 0) {
+        resultado += centenas[c];
+    }
+
+    if (d == 1) {
+        if (!resultado.empty()) resultado += " e ";
+        resultado += especiais[u];
+        return resultado;
+    }
+
+    if (d > 1) {
+        if (!resultado.empty()) resultado += " e ";
+        resultado += dezenas[d];
+    }
+
+    if (u > 0) {
+        if (!resultado.empty()) resultado += " e ";
+        resultado += unidades[u];
+    }
+
+    return resultado;
+}
+
+string numeroPorExtenso(int inteiro) {
+    int milhar = inteiro / 1000;
+    int resto = inteiro % 1000;
+
+    string resultado = "";
+
+    if (milhar > 0) {
+        if (milhar == 1)
+            resultado += "mil";
+        else
+            resultado += converteGrupo(milhar) + " mil";
+    }
+
+    if (resto > 0) {
+        if (!resultado.empty()) resultado += ", ";
+        resultado += converteGrupo(resto);
+    }
+
+    return resultado;
+}
+
+int main() {
+    string entrada;
+    cout << "Digite o número (ex: 234.567,50): ";
+    cin >> entrada;
+
+    if (!validarEntrada(entrada)) {
+        cout << "Entrada inválida!" << endl;
+        return 1;
+    }
+
+    // Separar inteiro e centavos
+    string parteInteira = "";
+    string parteDecimal = "00";
+
+    bool decimal = false;
+
+    for (char c : entrada) {
+        if (c == ',') {
+            decimal = true;
+            continue;
+        }
+        if (c == '.') continue;
+
+        if (!decimal)
+            parteInteira += c;
+        else
+            parteDecimal += c;
+    }
+
+    int inteiro = stoi(parteInteira);
+    int centavos = stoi(parteDecimal.substr(0, 2));
+
+    if (inteiro > 999999) {
+        cout << "Número fora do limite!" << endl;
+        return 1;
+    }
+
+    string resultado = numeroPorExtenso(inteiro) + " reais";
+
+    if (centavos > 0) {
+        resultado += " e " + converteGrupo(centavos) + " centavos";
+    }
+
+    cout << resultado << endl;
+
+    return 0;
+}
